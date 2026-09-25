@@ -39,19 +39,19 @@ test('dry run shows integration and data files without changing the workspace', 
 test('scaffold creates adapter, manifest, test, and empty campus snapshots', () => {
   const workspace = fixture();
   try {
-    const plan = universityPlan('tmu', workspace, ['--name', 'Toronto Metropolitan University', '--short-name', 'TMU']);
-    assert.equal(plan.length, 9);
+    const plan = universityPlan('mcmaster', workspace, ['--name', 'McMaster University', '--short-name', 'McMaster']);
+    assert.equal(plan.length, 11);
     assert.ok(plan.every(([path]) => !path.includes('/src/components/') && !path.includes('/src/routes/')));
-    const result = spawnSync('node', ['bin/gapwise.mjs', 'university', 'create', 'tmu', '--name', 'Toronto Metropolitan University', '--short-name', 'TMU', '--workspace', workspace],
+    const result = spawnSync('node', ['bin/gapwise.mjs', 'university', 'create', 'mcmaster', '--name', 'McMaster University', '--short-name', 'McMaster', '--workspace', workspace],
       { cwd: resolve(import.meta.dirname, '..'), encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
     const manifest = JSON.parse(readFileSync(join(workspace, 'gapwise/universities.json')));
-    assert.equal(manifest.universities.at(-1).name, 'Toronto Metropolitan University');
+    assert.equal(manifest.universities.at(-1).name, 'McMaster University');
     assert.equal(manifest.universities.at(-1).status, 'scaffold');
-    assert.deepEqual(JSON.parse(readFileSync(join(workspace, 'data/universities/tmu/campus.json'))).entrances, []);
-    assert.deepEqual(JSON.parse(readFileSync(join(workspace, 'gapwise/src/data/campuses/tmu/catalog.json'))).buildings, []);
-    assert.match(readFileSync(join(workspace, 'gapwise/src/data/campuses/index.ts'), 'utf8'), /"tmu": tmuCatalogRaw/);
-    assert.deepEqual(readdirSync(join(workspace, 'gapwise/src/universities/tmu')).sort(), ['adapter.test.ts', 'adapter.ts']);
+    assert.deepEqual(JSON.parse(readFileSync(join(workspace, 'data/universities/mcmaster/campus.json'))).entrances, []);
+    assert.deepEqual(JSON.parse(readFileSync(join(workspace, 'gapwise/src/data/campuses/mcmaster/catalog.json'))).buildings, []);
+    assert.match(readFileSync(join(workspace, 'gapwise/src/data/campuses/index.ts'), 'utf8'), /"mcmaster": mcmasterCatalogRaw/);
+    assert.deepEqual(readdirSync(join(workspace, 'gapwise/src/universities/mcmaster')).sort(), ['adapter.test.ts', 'adapter.ts', 'demo-timetable.ts']);
   } finally { rmSync(workspace, { recursive: true, force: true }); }
 });
 
@@ -60,6 +60,7 @@ test('rejects unsafe IDs and duplicate registration', () => {
   try {
     assert.throws(() => universityPlan('../evil', workspace), /ID/);
     assert.throws(() => universityPlan('carleton', workspace), /already registered/);
+    assert.throws(() => universityPlan('tmu', workspace), /already registered/);
   } finally { rmSync(workspace, { recursive: true, force: true }); }
 });
 
@@ -72,12 +73,12 @@ test('university validate detects scaffold state and unknown universities', () =
     assert.notEqual(unknown.status, 0);
     assert.match(unknown.stderr, /nonexistent is not registered/);
 
-    // Scaffold tmu
-    spawnSync('node', ['bin/gapwise.mjs', 'university', 'create', 'tmu', '--workspace', workspace],
+    // Scaffold mcmaster
+    spawnSync('node', ['bin/gapwise.mjs', 'university', 'create', 'mcmaster', '--workspace', workspace],
       { cwd: resolve(import.meta.dirname, '..'), encoding: 'utf8' });
 
     // Validating unactivated scaffold fails
-    const scaffoldCheck = spawnSync('node', ['bin/gapwise.mjs', 'university', 'validate', 'tmu', '--workspace', workspace],
+    const scaffoldCheck = spawnSync('node', ['bin/gapwise.mjs', 'university', 'validate', 'mcmaster', '--workspace', workspace],
       { cwd: resolve(import.meta.dirname, '..'), encoding: 'utf8' });
     assert.notEqual(scaffoldCheck.status, 0);
     assert.match(scaffoldCheck.stderr, /still a scaffold/);

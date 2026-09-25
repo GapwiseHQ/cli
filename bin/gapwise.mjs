@@ -45,20 +45,27 @@ export function universityPlan(id, workspace, args = []) {
   const registry = readFileSync(adapterRegistryPath, 'utf8');
   const catalogRegistry = readFileSync(catalogRegistryPath, 'utf8');
   const marker = '  // GAPWISE_ADAPTER_REGISTRY: the CLI inserts new timetable adapters here.';
+  const demoMarker = '  // GAPWISE_DEMO_LOADER_REGISTRY: the CLI inserts new demo loaders here.';
   const catalogMarker = '  // GAPWISE_CAMPUS_CATALOG_REGISTRY: the CLI inserts new catalog imports here.';
   if (!registry.includes(marker)) throw new Error('Adapter registry marker is missing.');
   if (!catalogRegistry.includes(catalogMarker)) throw new Error('Campus catalog registry marker is missing.');
   manifest.universities.push({
     id, name, shortName, hosts: [host], campuses: [id], defaultCampus: id,
-    timetableAdapter: `${id}-ics`, calendarSource: name,
-    calendarInstructions: `Choose a ${name} class calendar (.ics) from your device.`,
+    timetableAdapter: `${id}-schedule`, calendarSource: name,
+    calendarInstructions: `Choose a ${name} class calendar (.ics) or paste schedule text.`,
     calendarHelpUrl: '/support',
     enabledFeatures: { routing: false, liveLocation: false }, routableCampuses: [],
     dataPaths: [`universities/${id}/campus.json`], status: 'scaffold',
   });
-  const adapter = `import type { ParsedTimetable } from '@/lib/timetable-types';\n\n/** Implement ${name} ingestion and normalize every meeting into ParsedTimetable. */\nexport async function parseTimetable(_text: string): Promise<ParsedTimetable> {\n  throw new Error('${name} timetable ingestion has not been implemented.');\n}\n`;
+  const pascalName = id.replace(/(^|-)[a-z]/g, (match) => match.replace('-', '').toUpperCase());
+  const adapter = `import type { ParsedTimetable, Meeting } from '@/lib/timetable-types';\n\n/** Implement ${name} ingestion and normalize every meeting into ParsedTimetable. */\nexport async function parseTimetable(_text: string): Promise<ParsedTimetable> {\n  throw new Error('${name} timetable ingestion has not been implemented.');\n}\n\nexport async function load${pascalName}DemoTimetable(): Promise<Meeting[]> {\n  return [];\n}\n`;
   const adapterTest = `import { test } from 'bun:test';\n\ntest('${id} timetable adapter normalizes a real source fixture', () => {\n  throw new Error('Add a permitted timetable fixture and verify canonical meeting output.');\n});\n`;
-  const newRegistry = registry.replace(marker, `  "${id}-ics": async (text) => (await import("./${id}/adapter")).parseTimetable(text),\n${marker}`);
+  const demoTimetable = `import type { Meeting } from '../common/model';\n\nexport const DEMO_${id.toUpperCase().replaceAll('-', '_')}_MEETINGS: Meeting[] = [];\n`;
+  const sourcesDoc = `# ${name} Data Sources and Verification\n\n- Institution: ${name} (${id})\n- Date: ${new Date().toISOString().slice(0, 10)}\n- Verification: Pending review\n\n## Sources\n\n1. Official campus directory and open datasets\n2. OpenStreetMap campus elements\n`;
+  let newRegistry = registry.replace(marker, `  "${id}-schedule": async (text) => (await import("./${id}/adapter")).parseTimetable(text),\n${marker}`);
+  if (registry.includes(demoMarker)) {
+    newRegistry = newRegistry.replace(demoMarker, `  "${id}-schedule": async () => (await import("./${id}/adapter")).load${pascalName}DemoTimetable(),\n${demoMarker}`);
+  }
   const newCatalogRegistry = catalogRegistry
     .replace('import carletonCatalogRaw from "./carleton/catalog.json?raw";',
       `import carletonCatalogRaw from "./carleton/catalog.json?raw";\nimport ${id.replaceAll('-', '_')}CatalogRaw from "./${id}/catalog.json?raw";`)
@@ -74,8 +81,10 @@ export function universityPlan(id, workspace, args = []) {
     [catalogRegistryPath, newCatalogRegistry],
     [join(integration, 'adapter.ts'), adapter],
     [join(integration, 'adapter.test.ts'), adapterTest],
+    [join(integration, 'demo-timetable.ts'), demoTimetable],
     [join(dataDir, 'campus.json'), json(campus)],
     [join(dataDir, 'academic.json'), json(academic)],
+    [join(data, `docs/universities/${id}-sources.md`), sourcesDoc],
     [join(app, `src/data/campuses/${id}/campus.json`), json(campus)],
     [join(app, `src/data/campuses/${id}/catalog.json`), json(catalog)],
   ];
