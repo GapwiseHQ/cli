@@ -1,0 +1,10 @@
+{
+  "name": "@gapwise/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "bin": { "gapwise": "./bin/gapwise.mjs" },
+  "scripts": { "test": "node --test tests/*.test.mjs" },
+  "engines": { "node": ">=24" },
+  "files": ["bin", "README.md", "LICENSE"]
+}
