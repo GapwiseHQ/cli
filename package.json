@@ -1,8 +1,16 @@
 {
   "name": "@gapwise/cli",
   "version": "0.1.0",
+  "description": "University integration and campus data tooling for Gapwise",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://docs.gapwise.ca",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GapwiseHQ/cli.git"
+  },
+  "bugs": { "url": "https://github.com/GapwiseHQ/cli/issues" },
+  "keywords": ["gapwise", "university", "campus", "timetable", "cli"],
   "bin": { "gapwise": "./bin/gapwise.mjs" },
   "scripts": { "test": "node --test tests/*.test.mjs" },
   "engines": { "node": ">=24" },

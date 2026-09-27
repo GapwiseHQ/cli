@@ -7,29 +7,29 @@
 ### Repeatable university integrations for one Gapwise product.
 
 [![MIT](https://img.shields.io/badge/License-MIT-111111?style=for-the-badge)](LICENSE)
+[![CI](https://github.com/GapwiseHQ/cli/actions/workflows/ci.yml/badge.svg)](https://github.com/GapwiseHQ/cli/actions/workflows/ci.yml)
 
 </div>
 
 ## Purpose
 
-The CLI scaffolds a university manifest entry, timetable adapter, test, and empty campus data files in the sibling `gapwise` and `data` repositories. It also creates the app's empty campus mirror and map catalog so the generic campus loader discovers the new ID. It never copies application screens. Generated data contains no invented buildings, entrances, or routes.
+The CLI scaffolds a university manifest entry, timetable adapter, test, and empty campus data files in the sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) repositories. It also creates the app's empty campus mirror and map catalog so the generic campus loader discovers the new ID. It never copies application screens. Generated data contains no invented buildings, entrances, or routes.
 
 ## Installation
 
-Requires Node 24, Bun 1.3.14 for application tests, and sibling `gapwise` and `data` checkouts.
+Requires Node 24, Bun 1.3.14 for application tests, and sibling `gapwise` and `data` checkouts. The canonical CLI source is [GapwiseHQ/cli](https://github.com/GapwiseHQ/cli). Install directly from that repository:
 
 ```sh
-npm install -g .
-# Or run without global installation:
-node bin/gapwise.mjs university create example-university --dry-run
+npm install -g github:GapwiseHQ/cli
+gapwise university create example-university --dry-run
 ```
 
-Set `GAPWISE_WORKSPACE` or pass `--workspace /path/to/workspace` if the repositories are elsewhere.
+To work on the CLI itself, clone this repository and run `npm test` or `node bin/gapwise.mjs`. By default, commands expect `cli`, `gapwise`, and `data` as sibling directories. Set `GAPWISE_WORKSPACE` or pass `--workspace /path/to/workspace` to point to their parent directory.
 
 ## Usage
 
 ```sh
-gapwise university create tmu --name "Toronto Metropolitan University" --short-name TMU
+gapwise university create example-university --name "Example University" --short-name Example --dry-run
 gapwise university validate carleton
 gapwise university test carleton
 gapwise university dev carleton
@@ -54,7 +54,7 @@ node bin/gapwise.mjs university create example-university --dry-run
 
 ## Contributing
 
-Use a focused PR, cite data sources and their redistribution terms, and keep unknown access facts unknown. See the Gapwise contributor guide in `gapwise`.
+Use a focused PR, cite data sources and their redistribution terms, and keep unknown access facts unknown. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the [Gapwise documentation](https://docs.gapwise.ca).
 
 ## License
 
