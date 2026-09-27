@@ -76,6 +76,16 @@ test('rejects unsafe IDs and duplicate registration', () => {
   } finally { rmSync(workspace, { recursive: true, force: true }); }
 });
 
+test('quoted university names remain valid generated adapter code', () => {
+  const workspace = fixture();
+  try {
+    const plan = universityPlan('saint-johns', workspace, ['--name', "St. John's University"]);
+    const adapter = plan.find(([path]) => path.endsWith('/adapter.ts'))[1];
+    assert.match(adapter, /throw new Error\("St\. John's University timetable ingestion/);
+    assert.throws(() => universityPlan('unsafe', workspace, ['--name', 'Line\nBreak']), /single-line/);
+  } finally { rmSync(workspace, { recursive: true, force: true }); }
+});
+
 test('university validate detects scaffold state and unknown universities', () => {
   const workspace = fixture();
   try {

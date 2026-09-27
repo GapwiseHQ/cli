@@ -1,32 +1,48 @@
 <div align="center">
 
-<img src="assets/logo-mark.svg" width="116" alt="Gapwise deer mark" />
+<img src="https://raw.githubusercontent.com/GapwiseHQ/cli/main/assets/logo-mark.svg" width="116" alt="Gapwise deer mark" />
 
 # Gapwise CLI
 
-### Repeatable university integrations for one Gapwise product.
+Explore supported universities and campus data, or scaffold a new Gapwise integration.
 
 [![MIT](https://img.shields.io/badge/License-MIT-111111?style=for-the-badge)](LICENSE)
 [![CI](https://github.com/GapwiseHQ/cli/actions/workflows/ci.yml/badge.svg)](https://github.com/GapwiseHQ/cli/actions/workflows/ci.yml)
 
 </div>
 
-## Purpose
+The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 11 Canadian universities and 13 campus models; routing and place coverage vary by campus. No university affiliation is implied.
 
-The CLI scaffolds a university manifest entry, timetable adapter, test, and empty campus data files in the sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) repositories. It also creates the app's empty campus mirror and map catalog so the generic campus loader discovers the new ID. It never copies application screens. Generated data contains no invented buildings, entrances, or routes.
+## Install
 
-## Installation
-
-Requires Node 24, Bun 1.3.14 for application tests, and sibling `gapwise` and `data` checkouts. The canonical CLI source is [GapwiseHQ/cli](https://github.com/GapwiseHQ/cli). Install directly from that repository:
+Requires **Node.js 22 or newer**. [npm package: `@gapwise/cli`](https://www.npmjs.com/package/@gapwise/cli) is the intended canonical registry identity. Until the first registry release is verified, install from the [public source repository](https://github.com/GapwiseHQ/cli):
 
 ```sh
 npm install -g github:GapwiseHQ/cli
-gapwise university create example-university --dry-run
+gapwise --version
+gapwise --help
 ```
 
-To work on the CLI itself, clone this repository and run `npm test` or `node bin/gapwise.mjs`. By default, commands expect `cli`, `gapwise`, and `data` as sibling directories. Set `GAPWISE_WORKSPACE` or pass `--workspace /path/to/workspace` to point to their parent directory.
+After the registry release, install or upgrade from npm with `npm install -g @gapwise/cli`. To upgrade a GitHub installation, rerun `npm install -g github:GapwiseHQ/cli`. To uninstall either installation, run `npm uninstall -g @gapwise/cli`.
 
-## Usage
+## Explore the public platform
+
+```sh
+gapwise universities
+gapwise campuses --university uoft
+gapwise campuses --university york
+gapwise buildings --university carleton --query library
+gapwise residences --university tmu
+gapwise places --university uoft --campus utm --kind study
+gapwise route --university carleton --from TB --to ML
+gapwise buildings --university york --category residence --json
+```
+
+`--json` prints the full public API `{ data, meta }` response to stdout. Human output uses tab-separated columns for discovery and lists. Errors go to stderr and return a nonzero exit code. Campus queries require `--university`; when `--campus` is omitted, the selected university's default campus is used. For pagination, advanced filtering, and stable application integration, use the [API](https://docs.gapwise.ca/api/) or official [SDKs](https://docs.gapwise.ca/sdk/javascript/) directly. The CLI does not bypass API coverage or access private student data.
+
+## Integrate a new university
+
+Clone `cli`, `gapwise`, and `data` as sibling repositories, or pass their parent directory with `--workspace` (also available as `GAPWISE_WORKSPACE`). Maintainer validation and development need the runtimes required by those repositories, including Bun for the app tests.
 
 ```sh
 gapwise university create example-university --name "Example University" --short-name Example --dry-run
@@ -37,25 +53,18 @@ gapwise data validate carleton
 gapwise data osm tmu --bbox=-79.39,43.65,-79.37,43.67
 ```
 
-`university create <id> --dry-run` lists its changes without writing. A new integration starts with `status: scaffold`, an adapter that throws, an unfinished test, and empty campus data. Review the manifest, implement the adapter, add permitted source backed data, replace the test, and change the status before validation. `university dev` prints the local URL with `?university=<id>` and starts the canonical app.
+`university create --dry-run` lists its changes without writing. A new integration starts as a scaffold with an unimplemented adapter and empty campus data. Review the manifest, implement the adapter, add permitted source-backed data, replace the placeholder test, and change the status before validation. No application UI is copied or invented campus facts added. `data osm` saves an **unreviewed candidate** from an explicit OpenStreetMap bounding box; use `--input extract.osm` for a reproducible local XML extract. Candidate paths and entrances are not automatically promoted into routable data.
 
-`data osm` saves an **unreviewed candidate** from an explicit OpenStreetMap bounding box. Use `--input extract.osm` for a reproducible local XML extract and `--output path.json` to choose the output. It does not promote candidate paths or entrances into routable campus data. Review identities, rights, entrances, and connectivity before editing the canonical snapshot.
-
-## Architecture
-
-`gapwise/universities.json` is the deployment and tooling manifest. `gapwise/src/universities/` holds timetable adapters. `data/universities/` holds validated campus snapshots and provenance. Run `bun scripts/sync-campus-data.ts --write` in `gapwise` after changing canonical data; the campus loader discovers generated catalogs. Shared screens and route UI remain in `gapwise/src/components` and `gapwise/src/features`.
-
-## Development
+## Development and release
 
 ```sh
-npm test
-node bin/gapwise.mjs university create example-university --dry-run
+npm run check
 ```
 
-## Contributing
+`check` runs unit tests, packs the npm artifact, checks its contents and size, performs a clean global install, and executes the installed binary. CI runs it on Node 22 and 24. [Release guidance](RELEASING.md) describes versioning, the initial npm owner bootstrap, and subsequent OIDC Trusted Publishing with provenance. The CLI has no runtime dependencies.
 
-Use a focused PR, cite data sources and their redistribution terms, and keep unknown access facts unknown. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the [Gapwise documentation](https://docs.gapwise.ca).
+Read the [CLI guide](https://docs.gapwise.ca/cli/), [developer documentation](https://docs.gapwise.ca/), [contribution guide](CONTRIBUTING.md), and [security policy](SECURITY.md). Gapwise itself is at [gapwise.ca](https://gapwise.ca).
 
 ## License
 
-CLI code is MIT licensed. Campus datasets retain their source specific rights and attribution.
+CLI code is [MIT licensed](LICENSE). Campus datasets retain their source-specific rights and attribution.

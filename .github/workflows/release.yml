@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  npm-and-github:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - name: Verify tag and main ancestry
+        run: |
+          test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - run: npm run check
+      - name: Publish (or confirm first version was bootstrapped by its owner)
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          if npm view "@gapwise/cli@$version" version --json >/dev/null 2>&1; then
+            echo "@gapwise/cli@$version already exists; verifying registry install."
+          else
+            npm publish --access public
+          fi
+      - name: Verify clean registry install
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          local_integrity=$(npm pack --json | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>console.log(JSON.parse(s)[0].integrity))')
+          registry_integrity=$(npm view "@gapwise/cli@$version" dist.integrity)
+          test "$local_integrity" = "$registry_integrity"
+          prefix=$(mktemp -d)
+          npm install --global --prefix "$prefix" "@gapwise/cli@$version" --ignore-scripts --no-audit --no-fund
+          test "$("$prefix/bin/gapwise" --version)" = "$version"
+          "$prefix/bin/gapwise" --help
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --title "Gapwise CLI $GITHUB_REF_NAME"

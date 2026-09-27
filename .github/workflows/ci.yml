@@ -11,11 +11,14 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      - run: npm test
-      - run: npm pack --dry-run
+          node-version: ${{ matrix.node }}
+      - run: npm run check
       - run: git diff --check
