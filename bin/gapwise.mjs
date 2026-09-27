@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { help, publicCommand } from './public-api.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const defaultWorkspace = resolve(scriptDir, '../..');
@@ -36,6 +37,8 @@ export function universityPlan(id, workspace, args = []) {
   if (manifest.universities.some((entry) => entry.id === id)) throw new Error(`${id} is already registered.`);
   const name = option(args, '--name') ?? (id.length <= 4 ? id.toUpperCase() : id.replace(/(^|-)[a-z]/g, (match) => match.replace('-', ' ').toUpperCase()));
   const shortName = option(args, '--short-name') ?? name;
+  if (![name, shortName].every((value) => value.trim() && !/[\x00-\x1f\x7f]/.test(value) && !value.includes('*/')))
+    throw new Error('University name and short name must be single-line text.');
   const host = option(args, '--host') ?? `${id}.gapwise.ca`;
   if (!/^[a-z0-9.-]+$/.test(host) || manifest.universities.some((entry) => entry.hosts.includes(host)))
     throw new Error('Host must be a unique lowercase DNS hostname.');
@@ -58,7 +61,7 @@ export function universityPlan(id, workspace, args = []) {
     dataPaths: [`universities/${id}/campus.json`], status: 'scaffold',
   });
   const pascalName = id.replace(/(^|-)[a-z]/g, (match) => match.replace('-', '').toUpperCase());
-  const adapter = `import type { ParsedTimetable, Meeting } from '@/lib/timetable-types';\n\n/** Implement ${name} ingestion and normalize every meeting into ParsedTimetable. */\nexport async function parseTimetable(_text: string): Promise<ParsedTimetable> {\n  throw new Error('${name} timetable ingestion has not been implemented.');\n}\n\nexport async function load${pascalName}DemoTimetable(): Promise<Meeting[]> {\n  return [];\n}\n`;
+  const adapter = `import type { ParsedTimetable, Meeting } from '@/lib/timetable-types';\n\n/** Implement ${name} ingestion and normalize every meeting into ParsedTimetable. */\nexport async function parseTimetable(_text: string): Promise<ParsedTimetable> {\n  throw new Error(${JSON.stringify(`${name} timetable ingestion has not been implemented.`)});\n}\n\nexport async function load${pascalName}DemoTimetable(): Promise<Meeting[]> {\n  return [];\n}\n`;
   const adapterTest = `import { test } from 'bun:test';\n\ntest('${id} timetable adapter normalizes a real source fixture', () => {\n  throw new Error('Add a permitted timetable fixture and verify canonical meeting output.');\n});\n`;
   const demoTimetable = `import type { Meeting } from '../common/model';\n\nexport const DEMO_${id.toUpperCase().replaceAll('-', '_')}_MEETINGS: Meeting[] = [];\n`;
   const sourcesDoc = `# ${name} Data Sources and Verification\n\n- Institution: ${name} (${id})\n- Date: ${new Date().toISOString().slice(0, 10)}\n- Verification: Pending review\n\n## Sources\n\n1. Official campus directory and open datasets\n2. OpenStreetMap campus elements\n`;
@@ -126,6 +129,17 @@ function validate(id, workspace) {
 }
 
 export function main(argv = process.argv.slice(2)) {
+  if (argv.length === 0 || argv.includes('--help') || argv.includes('-h')) {
+    console.log(help);
+    return;
+  }
+  if (argv.length === 1 && (argv[0] === '--version' || argv[0] === '-v')) {
+    console.log(readJson(join(scriptDir, '../package.json')).version);
+    return;
+  }
+  if (['universities', 'campuses', 'buildings', 'residences', 'places', 'route'].includes(argv[0])) {
+    return publicCommand(argv);
+  }
   const workspace = resolve(option(argv, '--workspace') ?? process.env.GAPWISE_WORKSPACE ?? defaultWorkspace);
   const [area, action, id] = argv;
   if (area === 'university' && action === 'create' && id) return create(id, workspace, argv);
@@ -144,6 +158,7 @@ export function main(argv = process.argv.slice(2)) {
     return;
   }
   if (area === 'data' && action === 'validate' && id) {
+    if (!validId.test(id)) throw new Error('Invalid university ID.');
     run('node', ['scripts/validate-university-data.mjs', id], join(workspace, 'data'));
     return;
   }
@@ -160,5 +175,8 @@ export function main(argv = process.argv.slice(2)) {
 }
 
 if (process.argv[1] && realpathSync(resolve(process.argv[1])) === fileURLToPath(import.meta.url)) {
-  try { main(); } catch (error) { console.error(error instanceof Error ? error.message : error); process.exitCode = 1; }
+  Promise.resolve().then(() => main()).catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  });
 }

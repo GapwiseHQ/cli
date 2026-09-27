@@ -1,18 +1,23 @@
 {
   "name": "@gapwise/cli",
-  "version": "0.1.0",
-  "description": "University integration and campus data tooling for Gapwise",
+  "version": "0.2.0",
+  "description": "Official Gapwise CLI for multi-university campus discovery and integration tooling",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://docs.gapwise.ca",
+  "homepage": "https://docs.gapwise.ca/cli/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GapwiseHQ/cli.git"
   },
   "bugs": { "url": "https://github.com/GapwiseHQ/cli/issues" },
-  "keywords": ["gapwise", "university", "campus", "timetable", "cli"],
+  "keywords": ["gapwise", "university", "campus", "campus-data", "cli"],
   "bin": { "gapwise": "./bin/gapwise.mjs" },
-  "scripts": { "test": "node --test tests/*.test.mjs" },
-  "engines": { "node": ">=24" },
-  "files": ["bin", "README.md", "LICENSE"]
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:package": "node scripts/verify-package.mjs",
+    "check": "npm test && npm run test:package"
+  },
+  "engines": { "node": ">=22" },
+  "files": ["bin", "README.md", "LICENSE"],
+  "publishConfig": { "access": "public" }
 }
