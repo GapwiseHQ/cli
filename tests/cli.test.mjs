@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -33,6 +33,18 @@ test('dry run shows integration and data files without changing the workspace', 
     assert.deepEqual(readFileSync(join(workspace, 'gapwise/universities.json')), before);
     assert.equal(existsSync(join(workspace, 'gapwise/src/universities/example-university')), false);
     assert.equal(existsSync(join(workspace, 'data/universities/example-university')), false);
+  } finally { rmSync(workspace, { recursive: true, force: true }); }
+});
+
+test('installed bin symlink executes the CLI', () => {
+  const workspace = fixture();
+  try {
+    const installedBin = join(workspace, 'gapwise-bin');
+    symlinkSync(resolve(import.meta.dirname, '../bin/gapwise.mjs'), installedBin);
+    const result = spawnSync(installedBin, ['university', 'create', 'example-university', '--dry-run', '--workspace', workspace],
+      { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Dry run for example-university/);
   } finally { rmSync(workspace, { recursive: true, force: true }); }
 });
 
