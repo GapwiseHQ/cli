@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
+import { readFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { resolve } from 'node:path';
@@ -51,9 +52,10 @@ test('help and version are useful without a checkout or network', async () => {
   assert.equal(help.code, 0);
   assert.match(help.stdout, /gapwise universities/);
   assert.match(help.stdout, /--university ID/);
+  const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8'));
   const version = await run(['--version']);
   assert.equal(version.code, 0);
-  assert.match(version.stdout, /^0\.2\.0\n$/);
+  assert.equal(version.stdout.trim(), pkg.version);
 });
 
 test('discovery and JSON output use the public API', async (t) => {

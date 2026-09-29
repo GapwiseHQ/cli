@@ -1,6 +1,6 @@
 {
   "name": "@gapwise/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Official Gapwise CLI for multi-university campus discovery and integration tooling",
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "bugs": { "url": "https://github.com/GapwiseHQ/cli/issues" },
   "keywords": ["gapwise", "university", "campus", "campus-data", "cli"],
-  "bin": { "gapwise": "./bin/gapwise.mjs" },
+  "bin": { "gapwise": "bin/gapwise.mjs" },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:package": "node scripts/verify-package.mjs",
