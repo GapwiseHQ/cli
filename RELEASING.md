@@ -22,14 +22,22 @@ npm run check
 npm publish --access public
 ```
 
-The intended first version is `0.2.0`; check `package.json` before publishing and do not publish from an old checkout. If npm reports scope ownership, organization, billing, or OTP requirements, resolve those requirements in npm. Do not publish under a personal scope as a substitute. After the first release appears on the registry, add an npm Trusted Publisher in the `@gapwise/cli` package settings:
+The initial 0.2.0 bootstrap was published manually to establish `@gapwise/cli` on the npm registry. For version 0.2.1 (which normalizes the bin path to `bin/gapwise.mjs` and verifies clean npx/global execution), from a clean checkout of merged `main`:
 
+```sh
+npm login
+npm whoami
+npm run check
+npm publish --access public
+```
+
+If npm Trusted Publishing has been configured for `@gapwise/cli`:
 - Provider: GitHub Actions
 - Organization/user: `GapwiseHQ`
 - Repository: `cli`
 - Workflow filename: `release.yml`
 - Allowed action: direct `npm publish`
 
-Then create and push an annotated `v0.2.0` tag on the same merged `main` commit. The workflow checks the existing registry version, verifies its install, and creates the corresponding GitHub Release. Subsequent new versions publish from the tag workflow through OIDC and get npm provenance. Keep the initial manual publish distinct from provenance-bearing OIDC releases; do not claim provenance for the manual first release.
+Then create and push an annotated `v0.2.1` tag on the same merged `main` commit. The workflow checks the existing registry version, verifies its install, and creates the corresponding GitHub Release. Subsequent new versions publish from the tag workflow through OIDC and get npm provenance. Keep the initial manual publish distinct from provenance-bearing OIDC releases; do not claim provenance for manual releases.
 
-If an npm owner authorizes this workspace with an interactive login, the maintainer can complete the first publish here and perform the external verification. Never commit auth tokens or `.npmrc` credentials.
+If an npm owner authorizes this workspace with an interactive login, the maintainer can complete the publish here and perform the external verification. Never commit auth tokens or `.npmrc` credentials.
