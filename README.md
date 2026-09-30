@@ -11,19 +11,19 @@ Explore supported universities and campus data, or scaffold a new Gapwise integr
 
 </div>
 
-The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 11 Canadian universities and 13 campus models; routing and place coverage vary by campus. No university affiliation is implied.
+The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 13 Canadian universities and 15 campus models; routing and place coverage vary by campus. No university affiliation is implied.
 
 ## Install
 
-Requires **Node.js 22 or newer**. [npm package: `@gapwise/cli`](https://www.npmjs.com/package/@gapwise/cli) is the intended canonical registry identity. Until the first registry release is verified, install from the [public source repository](https://github.com/GapwiseHQ/cli):
+Requires **Node.js 22 or newer**. Install the current verified [`@gapwise/cli` package from npm](https://www.npmjs.com/package/@gapwise/cli):
 
 ```sh
-npm install -g github:GapwiseHQ/cli
+npm install -g @gapwise/cli@0.2.1
 gapwise --version
 gapwise --help
 ```
 
-After the registry release, install or upgrade from npm with `npm install -g @gapwise/cli`. To upgrade a GitHub installation, rerun `npm install -g github:GapwiseHQ/cli`. To uninstall either installation, run `npm uninstall -g @gapwise/cli`.
+Upgrade with `npm install -g @gapwise/cli@latest`. To uninstall, run `npm uninstall -g @gapwise/cli`.
 
 ## Explore the public platform
 

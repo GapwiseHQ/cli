@@ -31,12 +31,17 @@ try {
   assert.ok(!binContent.includes('\r\n'), 'CLI entrypoint must use LF line endings');
   assert.ok(statSync(join(root, manifest.bin.gapwise)).mode & 0o111, 'CLI entrypoint must be executable');
 
-  // 3. Dry-run publish must emit zero normalization warnings
-  const dryRun = spawnSync('npm', ['publish', '--dry-run'], { cwd: root, encoding: 'utf8' });
-  assert.equal(dryRun.status, 0, `npm publish --dry-run failed:\n${dryRun.stdout}\n${dryRun.stderr}`);
+  // 3. Dry-run packing must emit zero normalization warnings. `npm publish --dry-run`
+  // consults the registry and fails after a version has shipped, so it is not a repeatable
+  // package-shape check for an already published release.
+  const dryRun = spawnSync('npm', ['pack', '--dry-run', '--json'], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  assert.equal(dryRun.status, 0, `npm pack --dry-run failed:\n${dryRun.stdout}\n${dryRun.stderr}`);
   assert.ok(
     !dryRun.stderr.includes('npm auto-corrected') && !dryRun.stderr.includes('was invalid and removed'),
-    `npm publish emitted bin normalization warning:\n${dryRun.stderr}`
+    `npm pack emitted bin normalization warning:\n${dryRun.stderr}`
   );
 
   // 4. Pack tarball and verify contents & metadata
