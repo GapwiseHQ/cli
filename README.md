@@ -11,7 +11,7 @@ Explore supported universities and campus data, or scaffold a new Gapwise integr
 
 </div>
 
-The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 13 Canadian universities and 15 campus models; routing and place coverage vary by campus. No university affiliation is implied.
+The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 14 Canadian universities and 16 campus models; routing and place coverage vary by campus. No university affiliation is implied.
 
 ## Install
 
@@ -36,6 +36,7 @@ gapwise residences --university tmu
 gapwise places --university uoft --campus utm --kind study
 gapwise route --university carleton --from TB --to ML
 gapwise buildings --university york --category residence --json
+gapwise route --university mcgill --campus mcgill-downtown --from LEA --to MAASS
 ```
 
 `--json` prints the full public API `{ data, meta }` response to stdout. Human output uses tab-separated columns for discovery and lists. Errors go to stderr and return a nonzero exit code. Campus queries require `--university`; when `--campus` is omitted, the selected university's default campus is used. For pagination, advanced filtering, and stable application integration, use the [API](https://docs.gapwise.ca/api/) or official [SDKs](https://docs.gapwise.ca/sdk/javascript/) directly. The CLI does not bypass API coverage or access private student data.
