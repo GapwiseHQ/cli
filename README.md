@@ -11,7 +11,7 @@ Explore supported universities and campus data, or scaffold a new Gapwise integr
 
 </div>
 
-The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 14 Canadian universities and 16 campus models; routing and place coverage vary by campus. No university affiliation is implied.
+The official CLI uses the [Gapwise public API](https://api.gapwise.ca/v1) for campus discovery, buildings, places, residences, and routes. Its maintainer commands work with sibling [`gapwise`](https://github.com/GapwiseHQ/gapwise) and [`data`](https://github.com/GapwiseHQ/data) checkouts. Gapwise supports 28 universities and 74 campus models; routing and place coverage vary by campus. No university affiliation is implied.
 
 ## Install
 
